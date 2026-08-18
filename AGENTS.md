@@ -2,18 +2,20 @@
 
 ## What this is
 
-Not written yet. One paragraph: what this project does and who uses it.
-This heading was scaffolded by `dev-standards/sync.mjs` and says nothing
-about the project — replace this line.
+A placeholder, and it says so itself: the README's entire message is that
+this repository is not currently in use. Nothing lives here yet except the
+shared standards below.
 
 ## The one thing to understand first
 
-The single fact someone would get wrong if nobody told them. Leave this
-until you know what it is.
+There is nothing to break and nothing to run. If real work ever starts here,
+write this file first — what the project is, and its commands — before any
+code lands.
 
 ## Commands
 
-- Not written yet.
+- `node scripts/handoff.mjs` — where the tree stands
+- `node scripts/preflight.mjs` — nothing configured yet
 
 <!-- BEGIN STANDARDS — generated from dev-standards/STANDARDS.md, do not edit here -->
 
