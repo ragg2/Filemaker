@@ -1,0 +1,7 @@
+{
+  "_comment": "This project's own. sync.mjs creates it once and never touches it again — edit freely. Each entry may be a plain string, or an object with `why` and `required: true` to make a missing one stop a deploy rather than warn.",
+  "name": "this project",
+  "env": [],
+  "hosts": [],
+  "scripts": []
+}

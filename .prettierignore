@@ -1,0 +1,19 @@
+
+
+# BEGIN STANDARDS — generated from dev-standards/style, do not edit here
+
+# Markdown is not formatted, anywhere.
+#
+# Two reasons, and the second is the hard one. The prose in these repositories
+# is hand-wrapped, and a formatter rewrapping it produces a large diff that
+# says nothing. More importantly, sync.mjs generates blocks inside AGENTS.md,
+# CLAUDE.md and .github/copilot-instructions.md — reformatting those changes
+# text that is compared byte for byte, so `sync.mjs --check` would report every
+# project permanently stale. A gate that always fails is one nobody reads.
+*.md
+*.mdc
+
+# Generated wholesale; formatting it fights whatever wrote it.
+package-lock.json
+
+# END STANDARDS

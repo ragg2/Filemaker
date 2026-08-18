@@ -1,0 +1,19 @@
+root = true
+
+# BEGIN STANDARDS — generated from dev-standards/style, do not edit here
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+max_line_length = 100
+
+# Markdown uses two trailing spaces as a hard line break, so stripping them
+# silently rewrites the text.
+[*.md]
+trim_trailing_whitespace = false
+
+# END STANDARDS
