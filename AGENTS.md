@@ -184,6 +184,12 @@ is lost when it closes.
   description matching the branch, including what is unverified and what is
   left. A description that only covers the first commit is worse than none,
   because it reads as current.
+- Before opening a pull request, look for one already open on the same work,
+  and push to that branch instead. Sessions cannot see each other, so two of
+  them solving one problem produce two branches that each look reasonable
+  alone and collide on merge. This is not hypothetical: a hand-applied copy of
+  these standards and the automated one landed in the same repository hours
+  apart, and the duplicate had to be unpicked by hand.
 - Say what you were about to do next. Git records what happened; nothing
   records what was planned, and that is usually the expensive half.
 - Do not schedule recurring check-ins on a pull request. Subscribing to its
