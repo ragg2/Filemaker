@@ -40,10 +40,14 @@ const configPath = 'release.config.json';
 if (!existsSync(configPath)) fail(`${configPath} is missing`);
 const config = JSON.parse(readFileSync(configPath, 'utf8'));
 if (config.enabled !== true) fail('release.config.json is not enabled');
-const requiredSecrets = config.requiredSecrets ?? ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID'];
+const requiredSecrets = config.requiredSecrets ?? ['CLOUDFLARE_API_TOKEN'];
 const missingSecrets = requiredSecrets.filter((name) => !(process.env[name] ?? '').trim());
 if (missingSecrets.length) {
   fail(`required repository secrets are missing: ${missingSecrets.join(', ')}`);
+}
+for (const [source, target] of Object.entries(config.secretAliases ?? {})) {
+  if (!source || !target) fail('secretAliases entries must name both source and target variables');
+  process.env[target] = process.env[source] ?? '';
 }
 
 const version = (process.env.RELEASE_VERSION ?? '').trim().replace(/^v/, '');
