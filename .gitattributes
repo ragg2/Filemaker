@@ -1,0 +1,22 @@
+
+
+# BEGIN STANDARDS — generated from dev-standards/style, do not edit here
+
+# The same commit must check out to the same deployable bytes on every OS.
+# Project-specific rules may follow this generated block and take precedence.
+* text=auto eol=lf
+
+# Do not trust text inference with binary assets. A false positive corrupts the
+# file during checkout, and the cause is almost invisible in an ordinary diff.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+*.pdf binary
+
+# END STANDARDS

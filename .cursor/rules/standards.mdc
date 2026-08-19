@@ -92,6 +92,9 @@ makes false.
 ## 6. Deploys, migrations, and data
 
 - Never a bare deploy. Always name the environment.
+- For a repository that serves production, merging to `main` triggers its
+  named production deployment. The merge is the production authorization;
+  the workflow still verifies what is served before reporting success.
 - Migrations are applied explicitly, never as a side effect of a deploy.
 - Prefer read-only checks against production. Do the writes on a test
   environment.
@@ -99,6 +102,9 @@ makes false.
   the first statement, drop the rest, and report success.
 - Clean up test fixtures when finished, and say what was removed.
 - Never commit personal data, addresses, exports, database dumps, or secrets.
+- Pin checkout line endings in `.gitattributes` when builds or deploys read
+  bytes from the working tree. Reapply new attributes with the repository's
+  safe normalization script; never use a hard reset as a normalization tool.
 
 ## 7. Commit only what you changed
 
