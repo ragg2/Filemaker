@@ -111,6 +111,9 @@ makes false.
 - For a repository that serves production, merging to `main` triggers its
   named production deployment. The merge is the production authorization;
   the workflow still verifies what is served before reporting success.
+- Every non-production site displays a persistent, unmistakable **TEST** label
+  in its interface. A test hostname or browser tab title alone is not enough;
+  the environment must remain obvious while someone is using the page.
 - Migrations are applied explicitly, never as a side effect of a deploy.
 - Prefer read-only checks against production. Do the writes on a test
   environment.
