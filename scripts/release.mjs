@@ -14,6 +14,20 @@ function run(command, label) {
   if (result.status !== 0) fail(`${label} failed with exit ${result.status ?? 'unknown'}`);
 }
 
+function runAndCapture(command, label) {
+  if (!command) fail(`${label} is not configured`);
+  const result = spawnSync(command, {
+    shell: true,
+    encoding: 'utf8',
+    env: process.env,
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  process.stdout.write(result.stdout ?? '');
+  process.stderr.write(result.stderr ?? '');
+  if (result.status !== 0) fail(`${label} failed with exit ${result.status ?? 'unknown'}`);
+  return `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
+}
+
 function git(...args) {
   return execFileSync('git', args, { encoding: 'utf8' }).trim();
 }
@@ -28,9 +42,7 @@ const config = JSON.parse(readFileSync(configPath, 'utf8'));
 if (config.enabled !== true) fail('release.config.json is not enabled');
 
 const version = (process.env.RELEASE_VERSION ?? '').trim().replace(/^v/, '');
-const deploymentId = (process.env.RELEASE_DEPLOYMENT_ID ?? '').trim();
 if (!/^\d+\.\d+\.\d+$/.test(version)) fail('RELEASE_VERSION must be MAJOR.MINOR.PATCH');
-if (!deploymentId) fail('RELEASE_DEPLOYMENT_ID is required');
 if (git('status', '--porcelain')) fail('checkout must be clean before a release');
 if (git('branch', '--show-current') !== 'main') fail('production releases run from main');
 
@@ -47,7 +59,22 @@ try {
 }
 
 if (config.installCommand) run(config.installCommand, 'dependency installation');
-run(config.deployCommand, 'production deploy');
+const deployOutput = runAndCapture(config.deployCommand, 'production deploy');
+if (!config.deploymentIdPattern) fail('deploymentIdPattern is not configured');
+let deploymentPattern;
+try {
+  deploymentPattern = new RegExp(config.deploymentIdPattern, 'g');
+} catch (error) {
+  fail(`deploymentIdPattern is invalid: ${error.message}`);
+}
+const deploymentIds = [...deployOutput.matchAll(deploymentPattern)].map((match) => match[1]);
+const uniqueDeploymentIds = [...new Set(deploymentIds.filter(Boolean))];
+if (uniqueDeploymentIds.length !== 1) {
+  fail(
+    `production deploy output identified ${uniqueDeploymentIds.length} deployment IDs; expected exactly one`
+  );
+}
+const [deploymentId] = uniqueDeploymentIds;
 run(config.verifyCommand, 'production verification');
 
 const tagObject = gh(

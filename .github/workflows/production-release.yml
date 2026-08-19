@@ -8,10 +8,6 @@ on:
         description: Semantic version without the v prefix
         required: true
         type: string
-      deployment_id:
-        description: Verified production deployment identifier
-        required: true
-        type: string
       work_items:
         description: Comma-separated shipped work-item IDs
         required: false
@@ -39,6 +35,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_VERSION: ${{ inputs.version }}
-          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
           RELEASE_WORK_ITEMS: ${{ inputs.work_items }}
         run: node scripts/release.mjs
