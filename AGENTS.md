@@ -186,5 +186,12 @@ is lost when it closes.
   because it reads as current.
 - Say what you were about to do next. Git records what happened; nothing
   records what was planned, and that is usually the expensive half.
+- Do not schedule recurring check-ins on a pull request. Subscribing to its
+  events is enough: those fire when something actually happened, and a timer
+  fires whether or not anything did. Waking hourly on a pull request that is
+  waiting on the owner costs real money to re-read a state nobody changed,
+  and it trains the owner to ignore the notification that matters. The owner
+  decides when a pull request merges; a session that has said what it is
+  waiting for has finished its turn.
 
 <!-- END STANDARDS -->
