@@ -114,6 +114,11 @@ makes false.
 - Every non-production site displays a persistent, unmistakable **TEST** label
   in its interface. A test hostname or browser tab title alone is not enough;
   the environment must remain obvious while someone is using the page.
+- Prove the release-tag creation path before changing `main`. Release metadata
+  never points at a tag that does not exist, and the release operation is not
+  complete until the remote tag resolves to the recorded commit. If direct tag
+  pushes are restricted, use the hosting provider's refs API rather than
+  leaving `main` in a knowingly broken intermediate state.
 - Migrations are applied explicitly, never as a side effect of a deploy.
 - Prefer read-only checks against production. Do the writes on a test
   environment.
