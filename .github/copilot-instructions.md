@@ -102,6 +102,12 @@ makes false.
   complete until the remote tag resolves to the recorded commit. If direct tag
   pushes are restricted, use the hosting provider's refs API rather than
   leaving `main` in a knowingly broken intermediate state.
+- Treat a release as one serialized operation: deploy and verify one immutable
+  commit, tag that commit through the remote API, regenerate derived records,
+  then commit the evidence. The tag names shipped code; the later commit that
+  contains the release record is bookkeeping and must not pretend to be the
+  shipped commit. Retry generated-record pushes after rebasing so concurrent
+  automation cannot turn a verified release into a non-fast-forward failure.
 - Migrations are applied explicitly, never as a side effect of a deploy.
 - Prefer read-only checks against production. Do the writes on a test
   environment.

@@ -1,0 +1,10 @@
+{
+  "_comment": "Project-owned after creation. Set enabled only after the named production deploy and verification commands work in GitHub Actions.",
+  "enabled": false,
+  "installCommand": "",
+  "deployCommand": "",
+  "verifyCommand": "",
+  "regenerateCommands": [],
+  "releaseRecord": "release/current.json",
+  "generatedPaths": []
+}
