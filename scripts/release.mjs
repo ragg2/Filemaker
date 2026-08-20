@@ -52,6 +52,11 @@ for (const [source, target] of Object.entries(config.secretAliases ?? {})) {
 
 const version = (process.env.RELEASE_VERSION ?? '').trim().replace(/^v/, '');
 if (!/^\d+\.\d+\.\d+$/.test(version)) fail('RELEASE_VERSION must be MAJOR.MINOR.PATCH');
+if (process.env.GITHUB_ACTIONS !== 'true') {
+  fail(
+    'production releases must run through the GitHub Actions Production Release workflow; do not deploy or create release tags from an agent checkout'
+  );
+}
 if (git('status', '--porcelain')) fail('checkout must be clean before a release');
 if (git('branch', '--show-current') !== 'main') fail('production releases run from main');
 

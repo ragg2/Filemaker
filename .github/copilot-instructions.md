@@ -102,6 +102,9 @@ makes false.
   complete until the remote tag resolves to the recorded commit. If direct tag
   pushes are restricted, use the hosting provider's refs API rather than
   leaving `main` in a knowingly broken intermediate state.
+- Run production releases only through their authorized release workflow. The
+  release runner refuses before deployment from an agent checkout, because its
+  proxy may accept branch pushes while rejecting tag refs.
 - Treat a release as one serialized operation: deploy and verify one immutable
   commit, tag that commit through the remote API, regenerate derived records,
   then commit the evidence. The tag names shipped code; the later commit that
