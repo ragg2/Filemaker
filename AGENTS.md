@@ -108,9 +108,16 @@ makes false.
 ## 6. Deploys, migrations, and data
 
 - Never a bare deploy. Always name the environment.
+- When work is ready to deploy, deploy it to the named test environment without
+  waiting for separate approval, then verify what the test site serves. A green
+  test deployment does not authorize production.
+- Production deployment always requires the owner's explicit approval. Do not
+  infer it from completed work, a green test site, a merge request, or a request
+  that does not name production.
 - For a repository that serves production, merging to `main` triggers its
-  named production deployment. The merge is the production authorization;
-  the workflow still verifies what is served before reporting success.
+  named production deployment. Merge only after production deployment has been
+  explicitly approved; that approved merge is the production authorization.
+  The workflow still verifies what is served before reporting success.
 - Every non-production site displays a persistent, unmistakable **TEST** label
   in its interface. A test hostname or browser tab title alone is not enough;
   the environment must remain obvious while someone is using the page.
