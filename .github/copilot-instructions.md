@@ -100,6 +100,10 @@ makes false.
 ## 6. Deploys, migrations, and data
 
 - Never a bare deploy. Always name the environment.
+- Every supported deployment target must be reachable through one guarded,
+  cross-platform entry point. Platform-specific commands delegate to that
+  implementation; they do not copy its gates. A target is not supported until
+  its complete pre-deploy and post-deploy verification path is available.
 - When work is ready to deploy, deploy it to the named test environment without
   waiting for separate approval, then verify what the test site serves. A green
   test deployment does not authorize production.
