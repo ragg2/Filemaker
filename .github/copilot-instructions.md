@@ -57,6 +57,10 @@ minute to find once a real screen was open.
 ## 3. Fix causes, not symptoms
 
 - Two places building the same thing will drift. Make it one place.
+- When a product may have native clients, keep domain rules, validation, data
+  access, authentication contracts, and synchronization independent of browser
+  rendering and browser-only storage. Platform interfaces may be rebuilt;
+  product behaviour and API contracts should remain reusable.
 - When a bug is possible because of the shape of the code, change the shape. A
   comment saying "remember to also update X" is a bug with a delay on it.
 - Before extending a rule to a new case by analogy, check that it really is
