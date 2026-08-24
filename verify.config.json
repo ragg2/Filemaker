@@ -1,0 +1,8 @@
+{
+  "_comment": "This project's own. sync.mjs creates it once and never touches it again — edit freely. `base` is the production origin; each page maps a served path to the built file it must match byte for byte. `header`/`tokenEnv` name the WAF skip header and the Actions secret (defaults X-Production-Verify / PRODUCTION_VERIFY_TOKEN); with both in place the compare is byte-exact, without them HTML tolerates only Cloudflare's injected script. Point release.config.json's verifyCommand at `node scripts/verify-served.mjs` to run this after every release.",
+  "name": "this project",
+  "base": "",
+  "header": "X-Production-Verify",
+  "tokenEnv": "PRODUCTION_VERIFY_TOKEN",
+  "pages": []
+}
