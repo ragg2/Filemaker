@@ -16,14 +16,14 @@
  *   zone → Security → WAF → Custom rules → HTTP header `header` equals the
  *   token → Skip: Browser Integrity Check and remaining custom rules. With the
  *   rule and the token, comparison here is byte-exact with no tolerance at
- *   all. **One value per zone, not one value everywhere**: each zone's WAF
- *   rule carries its own token, and a repository's Actions secret holds the
- *   value for the zone it verifies — so a leaked secret exposes one zone's
- *   skip rule, not every zone's. A repository that verifies two zones names
- *   two secrets, one per page entry, via the per-page `tokenEnv` override.
- *   Rotate per zone: that zone's rule first, then the secrets of the
- *   repositories that verify it; the worst state in between is a release
- *   that reports unverified.
+ *   all. One shared value serves every zone's rule and every repository's
+ *   secret — decided 2026-08-24, reasoning in BUILD-STANDARDS section 11:
+ *   this secret only skips a bot check, so the leak it guards against costs
+ *   almost nothing. The per-page `tokenEnv` and `header` overrides remain
+ *   for a repository spanning zones with different headers, or for isolating
+ *   one zone later without touching the rest. Rotate in one pass: new value,
+ *   every rule first, then every secret; the worst state in between is a
+ *   release that reports unverified.
  * - **Without the token**, the one narrow tolerance is stripping that injected
  *   script before comparing: a <script> with no attributes whose body names
  *   Cloudflare's own path. Narrow on purpose — a lazy pattern would span from
