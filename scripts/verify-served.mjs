@@ -16,10 +16,14 @@
  *   zone → Security → WAF → Custom rules → HTTP header `header` equals the
  *   token → Skip: Browser Integrity Check and remaining custom rules. With the
  *   rule and the token, comparison here is byte-exact with no tolerance at
- *   all. The token lives in exactly four kinds of place — the WAF rule on each
- *   verified zone, and the PRODUCTION_VERIFY_TOKEN Actions secret in each
- *   releasing repository. Rotate by updating the rules first, then the
- *   secrets; the worst state in between is a release that reports unverified.
+ *   all. **One value per zone, not one value everywhere**: each zone's WAF
+ *   rule carries its own token, and a repository's Actions secret holds the
+ *   value for the zone it verifies — so a leaked secret exposes one zone's
+ *   skip rule, not every zone's. A repository that verifies two zones names
+ *   two secrets, one per page entry, via the per-page `tokenEnv` override.
+ *   Rotate per zone: that zone's rule first, then the secrets of the
+ *   repositories that verify it; the worst state in between is a release
+ *   that reports unverified.
  * - **Without the token**, the one narrow tolerance is stripping that injected
  *   script before comparing: a <script> with no attributes whose body names
  *   Cloudflare's own path. Narrow on purpose — a lazy pattern would span from
@@ -97,6 +101,26 @@ export function judge(localBuf, servedBuf, { contentType = '', tokenUsed = false
   };
 }
 
+/**
+ * Which URL, header and secret apply to one page. Per-page `base`, `header`
+ * and `tokenEnv` override the config's defaults, because a repository can
+ * verify more than one zone — Harp-Budget serves harpbudget.com and
+ * harpfarms.com from one checkout — and per-zone secrets only work if each
+ * page can name its own. Pure and exported so the override rules are pinned
+ * by tests rather than trusted.
+ */
+export function resolvePage(config, page, env = process.env) {
+  const tokenEnv = page.tokenEnv ?? config.tokenEnv ?? 'PRODUCTION_VERIFY_TOKEN';
+  const token = env[tokenEnv];
+  const header = page.header ?? config.header ?? 'X-Production-Verify';
+  return {
+    url: `${page.base ?? config.base}${page.path}`,
+    headers: token ? { [header]: token } : {},
+    tokenUsed: !!token,
+    tokenEnv,
+  };
+}
+
 async function fetchOnce(url, headers) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -142,20 +166,25 @@ async function main() {
     return;
   }
 
-  const tokenEnv = config.tokenEnv ?? 'PRODUCTION_VERIFY_TOKEN';
-  const token = process.env[tokenEnv];
-  const headers = token ? { [config.header ?? 'X-Production-Verify']: token } : {};
-  if (!token) {
+  const unset = [
+    ...new Set(
+      pages
+        .map((p) => resolvePage(config, p))
+        .filter((r) => !r.tokenUsed)
+        .map((r) => r.tokenEnv)
+    ),
+  ];
+  for (const name of unset) {
     console.log(
-      `  ${tokenEnv} is not set, so Cloudflare's injected script is tolerated on\n` +
-        '  HTML pages and the compare is not byte-exact. Set the secret and the\n' +
-        '  WAF skip rule to close that gap.\n'
+      `  ${name} is not set, so Cloudflare's injected script is tolerated on\n` +
+        '  the HTML pages it covers and the compare is not byte-exact. Set the\n' +
+        '  secret and the WAF skip rule to close that gap.\n'
     );
   }
 
   let failed = 0;
   for (const page of pages) {
-    const url = `${config.base}${page.path}`;
+    const { url, headers, tokenUsed } = resolvePage(config, page);
     const localPath = join(ROOT, page.file);
     if (!existsSync(localPath)) {
       console.log(` MISS   ${page.path.padEnd(18)} built file missing: ${page.file}`);
@@ -176,7 +205,7 @@ async function main() {
         outcome = { state: 'differs', detail: `HTTP ${served.status}` };
         continue;
       }
-      outcome = judge(local, served.body, { contentType: served.contentType, tokenUsed: !!token });
+      outcome = judge(local, served.body, { contentType: served.contentType, tokenUsed });
       if (outcome.state === 'match') break;
     }
     const mark = outcome.state === 'match' ? '  ok   ' : ' DIFF  ';
