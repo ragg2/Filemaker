@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 function fail(message) {
   console.error(`release: ${message}`);
@@ -138,6 +139,14 @@ const record = {
   productionStatus: 'Verified',
   workItems,
 };
+// The directory is created rather than assumed. A project releasing for the
+// first time has no release/ yet, and writeFileSync throws ENOENT — after the
+// deploy, after both verification passes, and after the tag. Tags here are
+// deliberately immutable, so that version can never be released again: the
+// first release of every project was the one that could not be retried, and it
+// failed with production already changed. Mapwork hit it on 2026-08-20 and had
+// to write its own record by hand.
+mkdirSync(dirname(recordPath), { recursive: true });
 writeFileSync(recordPath, `${JSON.stringify(record, null, 2)}\n`);
 
 for (const command of config.regenerateCommands ?? []) run(command, 'generated-artifact refresh');

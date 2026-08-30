@@ -62,6 +62,13 @@ minute to find once a real screen was open.
   access, authentication contracts, and synchronization independent of browser
   rendering and browser-only storage. Platform interfaces may be rebuilt;
   product behaviour and API contracts should remain reusable.
+- A session may be *carried* by storage the client provides; it is never
+  *authorised* by it. Where a client depends on such a store, that store being
+  refused is a stated outcome the interface names — a sign-in that cannot keep
+  its session says so, rather than returning to the sign-in page as though
+  nothing had happened. A visitor can switch that storage off, and a login that
+  depends on it silently loops forever while the server records a successful
+  sign-in every time.
 - When persistent user data is meant to follow a user across clients or devices,
   the authenticated server account is authoritative. Every supported client
   uses the same documented synchronization and conflict rules, and server
