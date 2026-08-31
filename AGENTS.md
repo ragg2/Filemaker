@@ -124,6 +124,14 @@ makes false.
 ## 6. Deploys, migrations, and data
 
 - Never a bare deploy. Always name the environment.
+- **Deploy only what is committed and pushed.** A deploy names a commit that
+  exists on the remote; a working tree is not a deployable artifact. Live code
+  that was never pushed cannot be reviewed, rolled back, or rebuilt, and the
+  next session starts from a repository that does not contain it — so it gets
+  written again, differently. That is how one bug recurs across sessions that
+  cannot see each other. `scripts/preflight.mjs --deploy` refuses on a dirty
+  tree or an unpushed commit; run it from the deploy entry point rather than
+  remembering this.
 - Every supported deployment target must be reachable through one guarded,
   cross-platform entry point. Platform-specific commands delegate to that
   implementation; they do not copy its gates. A target is not supported until

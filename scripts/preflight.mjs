@@ -17,11 +17,13 @@
  * imported. That is a real cost, accepted because the alternative is a file
  * that only works in the repository it came from.
  *
- *   node scripts/preflight.mjs         # exit 1 only on a real blocker
- *   node scripts/preflight.mjs --json  # same, machine-readable
+ *   node scripts/preflight.mjs           # exit 1 only on a real blocker
+ *   node scripts/preflight.mjs --deploy  # also refuse to ship an unpushed commit
+ *   node scripts/preflight.mjs --json    # same, machine-readable
  */
 
 import { readFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -137,6 +139,91 @@ if ((config.scripts ?? []).length) {
     if (pkg.scripts?.[name]) record('ok', `script: ${name}`, 'defined');
     else record('warn', `script: ${name}`, 'not defined in package.json');
   }
+}
+
+// -------------------------------------------------------------- git state
+
+/**
+ * Standard 6: a deploy names a commit that exists on the remote.
+ *
+ * A working tree is not a deployable artifact. Code that is live and unpushed
+ * cannot be reviewed, rolled back, or rebuilt, and the next session starts
+ * from a repository that does not contain it — so it gets written again,
+ * differently, which is how one bug recurs across sessions that cannot see
+ * each other.
+ *
+ * Not hypothetical. A login system was deployed to a test hostname from a
+ * checkout that was never pushed; the repository it belonged to contained no
+ * authentication code at all, and two sessions then spent a day debugging a
+ * page neither of them could read.
+ *
+ * Only --deploy makes these blockers. Preflight also runs during ordinary
+ * work, where a dirty tree is the normal state, and a rail that fires on the
+ * normal state is the standard 4 warning that gets ignored when it matters.
+ */
+const deploying = process.argv.includes('--deploy');
+const gitLevel = deploying ? 'block' : 'warn';
+
+const git = (...args) => {
+  try {
+    return execFileSync('git', args, {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return null;
+  }
+};
+
+if (git('rev-parse', '--is-inside-work-tree') === 'true') {
+  const dirty = git('status', '--porcelain');
+  if (dirty === null) {
+    record('warn', 'git: working tree', 'could not be read');
+  } else if (dirty) {
+    const n = dirty.split('\n').length;
+    record(
+      gitLevel,
+      'git: working tree',
+      `${n} uncommitted file${n === 1 ? '' : 's'}`,
+      'Commit them by name. Standard 7: stage the paths you edited, and leave ' +
+        'changes you did not make alone rather than absorbing them.'
+    );
+  } else {
+    record('ok', 'git: working tree', 'clean');
+  }
+
+  const head = git('rev-parse', 'HEAD');
+  // Read against the local remote-tracking refs rather than the network, so
+  // this works offline. A stale ref errs toward "not pushed", which is the
+  // safe direction: it asks for a push that is already done, never the
+  // reverse.
+  const remotes = git('remote');
+  const onRemote = head && remotes ? git('branch', '-r', '--contains', 'HEAD') : null;
+
+  if (!head) {
+    record('warn', 'git: pushed', 'no commit yet');
+  } else if (!remotes) {
+    record(
+      'warn',
+      'git: pushed',
+      'no remote configured',
+      'A local-only checkout cannot be deployed from.'
+    );
+  } else if (onRemote === null) {
+    record('warn', 'git: pushed', 'could not be determined (shallow clone?)');
+  } else if (!onRemote) {
+    record(
+      gitLevel,
+      'git: pushed',
+      `${head.slice(0, 7)} is on no remote branch`,
+      'Push the branch first. A deploy names a commit someone else can check out.'
+    );
+  } else {
+    record('ok', 'git: pushed', `${head.slice(0, 7)} is on the remote`);
+  }
+} else if (deploying) {
+  record('warn', 'git: repository', 'not a git checkout');
 }
 
 // ---------------------------------------------------------------- report
