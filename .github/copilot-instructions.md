@@ -53,6 +53,19 @@ minute to find once a real screen was open.
   asked: what was run, and what came back. If the owner has to ask for the
   evidence, the report was not finished. This is what "deployed" costs — the
   fetched version alongside the built one, every time.
+- Lead with the outcome. The first sentence answers "what happened";
+  reasoning and evidence follow for whoever wants them.
+- Anything the owner must do goes in its own short block, set apart, never
+  inside a paragraph. If there is nothing, say "nothing for you."
+- Report the route taken, not the routes tried. A dead end earns a sentence
+  only when the failure is itself a finding — it cost money, revealed a
+  config problem, left state behind, or will be hit again. "Tried X, failed,
+  trying Y" is not a finding; delete it.
+- Evidence stays, compressed: what was run and what came back, one line per
+  claim that matters. Cutting the evidence is not brevity — it is how
+  "verified" and "assumed" stop being distinguishable. These four rules
+  govern chat replies; pull requests, decision logs, and journals stay
+  thorough, because they are the record.
 
 ## 3. Fix causes, not symptoms
 
