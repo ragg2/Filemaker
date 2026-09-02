@@ -82,12 +82,19 @@ try {
 } catch (error) {
   fail(`deploymentIdPattern is invalid: ${error.message}`);
 }
+// deployCommand is project-owned config: however many `wrangler deploy`
+// invocations it chains — one Worker or several — is the deliberate,
+// intended deployment count, not a fixed constant. A project with one
+// Worker still gets exactly one ID; a project deploying more than one
+// Worker in the same release (e.g. a main site plus a separate admin
+// console) gets all of them, in the order deployCommand ran them. What
+// stays a hard failure is finding none at all — that means the deploy
+// commands ran but produced no identifiable version, which is still a
+// real anomaly worth stopping on.
 const deploymentIds = [...deployOutput.matchAll(deploymentPattern)].map((match) => match[1]);
 const uniqueDeploymentIds = [...new Set(deploymentIds.filter(Boolean))];
-if (uniqueDeploymentIds.length !== 1) {
-  fail(
-    `production deploy output identified ${uniqueDeploymentIds.length} deployment IDs; expected exactly one`
-  );
+if (uniqueDeploymentIds.length === 0) {
+  fail('production deploy output did not include a deployment ID');
 }
 const [deploymentId] = uniqueDeploymentIds;
 run(config.verifyCommand, 'production verification');
@@ -135,6 +142,7 @@ const record = {
   commit: releaseCommit,
   tag,
   productionDeploymentId: deploymentId,
+  productionDeploymentIds: uniqueDeploymentIds,
   releaseDate: new Date().toISOString().slice(0, 10),
   productionStatus: 'Verified',
   workItems,
@@ -170,7 +178,7 @@ for (let attempt = 1; attempt <= 3; attempt += 1) {
   const push = spawnSync('git', ['push', 'origin', 'HEAD:main'], { stdio: 'inherit' });
   if (push.status === 0) {
     console.log(
-      `release: ${tag} -> ${releaseCommit}; production ${deploymentId} verified and recorded`
+      `release: ${tag} -> ${releaseCommit}; production ${uniqueDeploymentIds.join(', ')} verified and recorded`
     );
     process.exit(0);
   }
