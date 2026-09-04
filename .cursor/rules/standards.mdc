@@ -75,6 +75,44 @@ minute to find once a real screen was open.
   access, authentication contracts, and synchronization independent of browser
   rendering and browser-only storage. Platform interfaces may be rebuilt;
   product behaviour and API contracts should remain reusable.
+- A native mobile shell defaults to a web view loading the product's own web
+  app from its real origin — not a bundled copy of its files — with that web
+  app built and served as an installable PWA: a manifest and a registered
+  service worker, so it keeps working with the network off once it has
+  loaded successfully at least once. The deploy that ships a fix to the
+  website reaches every installed shell with no rebuild or store update; the
+  service worker is what keeps it usable between deploys with no network.
+  Ship a bundled copy instead only when a product has a stated need to work
+  with no network on its very first launch, before any connection has ever
+  succeeded — write that requirement down where the choice is made. For
+  nearly every product, first launch happens on whatever connection was
+  needed to install the app in the first place, so this is an exception to
+  name, not a default to assume.
+
+  *(Written three ways on this branch before landing here: bundle by
+  default, then remote by default, then this — remote, but the site itself
+  must be an installable PWA. A service worker gives a remote shell the same
+  offline guarantee bundling was chasing, without the cost of a second origin
+  or a copy to keep in sync; bundling earns its cost only for the rare
+  product that must work before its first successful connection, which
+  turned out to be the exception, not the rule.)*
+- A remote shell still needs a few native or manifest values before the web
+  content — or its cached copy — has painted anything: a launch screen's
+  color, a status bar's style, an icon, a PWA manifest's theme and background
+  colors. Those live outside the site's CSS, because nothing else is on
+  screen yet to read it from. Pin every one of them with a test that reads
+  that value and the CSS value as plain text and fails if they disagree —
+  caching, like bundling, only proves the two agreed at some past moment, not
+  that they still do.
+- An app built to work with the network off has to say so while it is
+  happening, not stay silent about it. When it detects no network reachable,
+  show a persistent, unmistakable banner — the same instinct as the TEST
+  label in §6 — naming the state and what it means: not connected, and
+  changes are saved locally and will sync once it reconnects. A driver who
+  does not know an entry is still local has no reason to trust it landed,
+  and no reason to check back once the network returns; the cached copy
+  working at all is not the same claim as the user knowing it is working
+  from a cache.
 - A session may be *carried* by storage the client provides; it is never
   *authorised* by it. Where a client depends on such a store, that store being
   refused is a stated outcome the interface names — a sign-in that cannot keep
