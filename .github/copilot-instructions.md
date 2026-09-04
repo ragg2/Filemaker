@@ -103,6 +103,21 @@ minute to find once a real screen was open.
   that value and the CSS value as plain text and fails if they disagree —
   caching, like bundling, only proves the two agreed at some past moment, not
   that they still do.
+- Background location tracking on a native shell only ever happens through
+  the platform's own native location API — the one thing a web page cannot
+  do once it is backgrounded. Foreground tracking is the web page's own
+  ordinary geolocation call, relayed through the shell's web view; nothing
+  native is needed for that half. Start and stop background tracking from
+  an explicit action in the web page, through the shell's bridge, never
+  automatically at launch — that is both the honest thing to do and the
+  only way requesting the OS's highest location authorization has a real
+  answer to "why does this app want that." Walk the OS's required staged
+  authorization (a lesser tier first, the highest tier second) rather than
+  request the highest tier in one step; asking for it immediately after the
+  first tier, rather than after the feature has first proven its value, is
+  a stated exception for a build that never goes through app-store review —
+  write that reason down, and revisit it before the build is ever
+  distributed anywhere a reviewer reads that signal.
 - An app built to work with the network off has to say so while it is
   happening, not stay silent about it. When it detects no network reachable,
   show a persistent, unmistakable banner — the same instinct as the TEST
