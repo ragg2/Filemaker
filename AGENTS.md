@@ -324,4 +324,36 @@ is lost when it closes.
   decides when a pull request merges; a session that has said what it is
   waiting for has finished its turn.
 
+## 11. End every change with a Tracker Handoff Summary
+
+Every session that changes a repository ends its final response with a
+completed **Tracker Handoff Summary** — the ten items below, in that order,
+every time. "Not applicable" or "none" is the answer for an item that does
+not apply; a session that changed a repository and stops without one has not
+finished. This is the fixed shape the rest of this file's reporting habits
+(1, 2, 5, 7) already ask for, so a summary from one repo reads the same as
+one from any other:
+
+1. **Work item and risk classification** — what kind of change this was
+   (feature, fix, chore, infra) and how risky it is, stated rather than left
+   for the reader to infer from the diff.
+2. **What changed** — the plain-language summary a reviewer reads first.
+3. **Files added, changed, or deleted** — by path (section 7: say which
+   files a commit contains, not just what it does).
+4. **Database, migration, API, and binding changes** — say "none" explicitly
+   when there are none; leaving this out reads as "not checked."
+5. **Testing completed** — what was actually run and what came back
+   (section 2), not that it should pass.
+6. **Test and production deployment status** — per environment:
+   deployed-and-verified, deployed-but-unverified, or not deployed.
+7. **Production-approval status** — approved, not requested, or not
+   applicable (section 6).
+8. **Commit and deployment identifiers** — commit SHAs, PR number, release
+   tag, deployment or version ID: whatever actually identifies what shipped.
+9. **Known risks or unresolved issues** — including ones outside what was
+   asked but touched by the diff (section 9's found-work rule already
+   requires naming these).
+10. **Version recommendation** — patch, minor, major, or "not a release,"
+    with the reason in a clause.
+
 <!-- END STANDARDS -->
