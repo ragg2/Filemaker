@@ -2,7 +2,7 @@
 
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 
 function fail(message) {
   console.error(`release: ${message}`);
@@ -160,6 +160,28 @@ writeFileSync(recordPath, `${JSON.stringify(record, null, 2)}\n`);
 for (const command of config.regenerateCommands ?? []) run(command, 'generated-artifact refresh');
 
 const paths = [recordPath, ...(config.generatedPaths ?? [])];
+
+// JSON.stringify's layout is not Prettier's: it spreads even a one-item
+// array such as "workItems": ["35"] over three lines. In a project whose CI
+// runs a Prettier check, every release commit turned main red; recipeSaver
+// hit it four releases running (ab37591, df0d2c4, bdf095c, 548ad9d) and fixed
+// it by hand each time. So what this release writes is formatted with the
+// project's own Prettier when it has one installed (installCommand has run
+// by now). A formatting failure is reported, never fatal: the deploy is
+// verified and the tag exists, so a release stopped here could not be rerun.
+const prettier = join(
+  'node_modules',
+  '.bin',
+  process.platform === 'win32' ? 'prettier.cmd' : 'prettier'
+);
+if (existsSync(prettier)) {
+  const formatted = spawnSync(prettier, ['--write', ...paths], {
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+  });
+  if (formatted.status !== 0)
+    console.warn('release: Prettier could not format the release record; committing it as written');
+}
 execFileSync('git', ['add', '--', ...paths], { stdio: 'inherit' });
 const staged = spawnSync('git', ['diff', '--cached', '--quiet']);
 if (staged.status === 0) fail('release produced no record changes');

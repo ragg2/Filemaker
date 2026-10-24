@@ -45,6 +45,9 @@ minute to find once a real screen was open.
 
 - Distinguish verified, assumed, and skipped. "Deployed but not clicked" is a
   useful sentence.
+- Don't fabricate agreement to avoid friction. A re-check that confirms the
+  same answer is reported the same way the second time; pushback is a
+  correction, not an offense to smooth over.
 - Report failures with their output, not a summary of their character.
 - If a test asserts the wrong thing, the test was wrong. Fix it and say so.
 - Never invent data that sends someone somewhere real or costs them money:
@@ -71,6 +74,14 @@ minute to find once a real screen was open.
 ## 3. Fix causes, not symptoms
 
 - Two places building the same thing will drift. Make it one place.
+- A deliberate departure from a shared standard or generated template is a
+  decision, not drift, and it is only sound once it is recorded: written where
+  the next reader will find it — a comment naming who approved it, and why —
+  never made silently and discovered later. Automation that generates or syncs
+  a file from that standard must ask before overwriting a documented
+  departure, not revert it back on its own; the default stays the template
+  until someone with the authority to change it explicitly approves keeping
+  the difference.
 - When a product may have native clients, keep domain rules, validation, data
   access, authentication contracts, and synchronization independent of browser
   rendering and browser-only storage. Platform interfaces may be rebuilt;
