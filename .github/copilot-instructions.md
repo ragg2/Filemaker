@@ -258,7 +258,10 @@ only until someone forgets. Scoping the commit removes the possibility.
   link to the project document that carries the detail. Work fully represented
   by an open GitHub issue need not be copied. Remove completed items rather
   than turning the file into history; completion belongs in the changelog,
-  release record, or closed issue. If there is no open work, say so explicitly.
+  release record, or closed issue. A newly scaffolded index is marked
+  `uninitialized`: it makes no claim about the repository until someone reviews
+  the existing plans and issues and removes that marker. If there is no open
+  work after review, say so explicitly.
 - A change is not finished until the docs that would mislead someone are
   updated. Stale setup docs are not harmless: they get read by people and by
   tools, and both act on them.
