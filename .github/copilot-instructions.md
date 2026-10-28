@@ -253,6 +253,12 @@ only until someone forgets. Scoping the commit removes the possibility.
 
 ## 8. Documentation is part of the work
 
+- Every active repository keeps a root `OPEN-WORK.md` as its short, current,
+  owner-facing work index. Record active, blocked, and backlog work there, or
+  link to the project document that carries the detail. Work fully represented
+  by an open GitHub issue need not be copied. Remove completed items rather
+  than turning the file into history; completion belongs in the changelog,
+  release record, or closed issue. If there is no open work, say so explicitly.
 - A change is not finished until the docs that would mislead someone are
   updated. Stale setup docs are not harmless: they get read by people and by
   tools, and both act on them.
